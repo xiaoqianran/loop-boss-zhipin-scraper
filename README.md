@@ -24,24 +24,27 @@
 ## 🚀 30 秒快速开始
 
 ```bash
-# 1. 克隆 + 装依赖
+# 1. 克隆 + 用 uv 创建虚拟环境并安装依赖
 git clone https://github.com/eatmoreduck/boss-zhipin-scraper.git
 cd boss-zhipin-scraper
-pip install -r requirements.txt          # 或 uv sync
+uv venv
+source .venv/bin/activate                 # Linux / macOS
+# .\.venv\Scripts\Activate.ps1           # Windows PowerShell
+uv sync
 
 # 2. 启动隔离 Chrome 并登录（只需一次，登录态持久保存）
-python3 scripts/boss_cdp_raw.py --setup-chrome
+uv run python scripts/boss_cdp_raw.py --setup-chrome
 
 # 3. 抓取 + 分析
-python3 scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --analysis
+uv run python scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --analysis
 
 # 支持全国城市（含三四五线），例如：
-python3 scripts/boss_cdp_raw.py --keyword "前端" --city 赣州 --pages 3
+uv run python scripts/boss_cdp_raw.py --keyword "前端" --city 赣州 --pages 3
 # 查看支持的城市：--list-cities [关键词]
-python3 scripts/boss_cdp_raw.py --list-cities 江
+uv run python scripts/boss_cdp_raw.py --list-cities 江
 
 # 4. 抓取后生成聚合摘要 + 提示词（默认读取最新结果）
-python3 scripts/job_summary.py
+uv run python scripts/job_summary.py
 ```
 
 抓完直接拿到：薪资分布、经验要求、高频技能词、求职材料优化提示词。提示词只基于岗位数据，不读取本地简历文件，也不给岗位算个人匹配分。
@@ -129,27 +132,30 @@ ls ~/.hermes/skills/data-science/boss-zhipin-scraper/data/city_codes.json
 不想装成 Skill 也可以直接当 CLI 用：
 
 ```bash
-# 1. 克隆 + 安装依赖
+# 1. 克隆 + 用 uv 创建虚拟环境并安装依赖
 git clone https://github.com/eatmoreduck/boss-zhipin-scraper.git
 cd boss-zhipin-scraper
-pip install -r requirements.txt
+uv venv
+source .venv/bin/activate                 # Linux / macOS
+# .\.venv\Scripts\Activate.ps1           # Windows PowerShell
+uv sync
 
 # 2. 启动 Chrome CDP
-python3 scripts/boss_cdp_raw.py --setup-chrome
+uv run python scripts/boss_cdp_raw.py --setup-chrome
 # 首次使用也不会复制主 Chrome 登录态；请在弹出的 BOSS 专用浏览器中登录 zhipin.com
 # setup 会等待登录完成，并确认接口能返回明文薪资
 
 # 3. 检查环境
-python3 scripts/boss_cdp_raw.py --check
+uv run python scripts/boss_cdp_raw.py --check
 
 # 可选：真实浏览器/API smoke test（不写结果文件）
-python3 scripts/boss_cdp_raw.py --smoke-test
+uv run python scripts/boss_cdp_raw.py --smoke-test
 
 # 4. 抓取
-python3 scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --format csv --analysis
+uv run python scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --format csv --analysis
 
 # 5. 抓取后摘要和提示词
-python3 scripts/job_summary.py --top 15
+uv run python scripts/job_summary.py --top 15
 ```
 
 ## 参数
@@ -186,16 +192,16 @@ python3 scripts/job_summary.py --top 15
 
 ```bash
 # 读取默认结果目录下最新的 boss_jobs_*.json，并自动匹配同时间戳或最新详情文件
-python3 scripts/job_summary.py
+uv run python scripts/job_summary.py
 
 # 指定列表和详情文件
-python3 scripts/job_summary.py \
+uv run python scripts/job_summary.py \
   --input ~/.boss-zhipin-scraper/job-result/boss_jobs_20260625_1200.json \
   --details ~/.boss-zhipin-scraper/job-result/boss_details_20260625_1200.json \
   --top 15
 
 # 只输出提示词
-python3 scripts/job_summary.py --prompt-only
+uv run python scripts/job_summary.py --prompt-only
 ```
 
 打包安装后也可以使用入口命令：
@@ -258,13 +264,13 @@ boss-zhipin-scraper/
 如确实需要从主 Chrome 手动导入 BOSS 登录态，可以显式运行：
 
 ```bash
-python3 scripts/boss_cdp_raw.py --setup-chrome --copy-login-state
+uv run python scripts/boss_cdp_raw.py --setup-chrome --copy-login-state
 ```
 
 `--copy-login-state` 每次运行都会覆盖隔离 profile 内对应的 Cookie 相关文件；日常启动不要加这个参数。它只复制 `Local State` 和 `Default/Cookies*`、`Default/Network/Cookies*` 这类 Cookie 数据库相关文件，不复制密码库、历史记录、扩展或完整 profile。需要清空专用浏览器登录态时使用：
 
 ```bash
-python3 scripts/boss_cdp_raw.py --setup-chrome --reset-chrome-profile
+uv run python scripts/boss_cdp_raw.py --setup-chrome --reset-chrome-profile
 ```
 
 ### 用完如何收尾
@@ -272,7 +278,7 @@ python3 scripts/boss_cdp_raw.py --setup-chrome --reset-chrome-profile
 抓取/分析结束后，专用 Chrome 不会自动关闭（默认保留登录态，方便你接着跑下一条抓取）。确认不再使用时，可以手动收尾：
 
 ```bash
-python3 scripts/boss_cdp_raw.py --stop-chrome
+uv run python scripts/boss_cdp_raw.py --stop-chrome
 ```
 
 `--stop-chrome` 只关闭 scraper 隔离 profile（`--user-data-dir`）对应的 Chrome 进程，**绝不**按端口或进程名去 kill，因此不会误伤你正在用的主 Chrome、Gmail、GitHub 等账号。
@@ -280,7 +286,7 @@ python3 scripts/boss_cdp_raw.py --stop-chrome
 如果你希望某次抓取正常结束后就顺手关掉 Chrome，可以加 `--close-chrome`：
 
 ```bash
-python3 scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --close-chrome
+uv run python scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --close-chrome
 ```
 
 `--close-chrome` 默认不开启；且只在抓取走完的**成功路径**上触发，登录失败、异常退出等情况不会关闭 Chrome，登录态得以保留。

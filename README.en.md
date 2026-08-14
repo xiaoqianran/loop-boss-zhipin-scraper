@@ -22,24 +22,27 @@ This project is for **learning and technical research purposes only**. It is int
 ## 🚀 30-Second Quick Start
 
 ```bash
-# 1. Clone + install deps
+# 1. Clone + create a uv venv and install deps
 git clone https://github.com/eatmoreduck/boss-zhipin-scraper.git
 cd boss-zhipin-scraper
-pip install -r requirements.txt          # or: uv sync
+uv venv
+source .venv/bin/activate                 # Linux / macOS
+# .\.venv\Scripts\Activate.ps1           # Windows PowerShell
+uv sync
 
 # 2. Launch an isolated Chrome and log in (only once; session persists)
-python3 scripts/boss_cdp_raw.py --setup-chrome
+uv run python scripts/boss_cdp_raw.py --setup-chrome
 
 # 3. Scrape + analyze
-python3 scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --analysis
+uv run python scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --analysis
 
 # Cities nationwide are supported (incl. tier-3/4/5), e.g.:
-python3 scripts/boss_cdp_raw.py --keyword "前端" --city 赣州 --pages 3
+uv run python scripts/boss_cdp_raw.py --keyword "前端" --city 赣州 --pages 3
 # List supported cities: --list-cities [keyword]
-python3 scripts/boss_cdp_raw.py --list-cities 江
+uv run python scripts/boss_cdp_raw.py --list-cities 江
 
 # 4. Generate an aggregated summary + prompt after scraping (reads the latest result)
-python3 scripts/job_summary.py
+uv run python scripts/job_summary.py
 ```
 
 Right after scraping you get: salary ranges, experience requirements, top skill keywords, and a job-application optimization prompt. The prompt is based solely on the scraped job data — it never reads your local résumé file and never scores personal-job match.
@@ -127,27 +130,30 @@ After installing, just say in a Hermes conversation: "Search BOSS Zhipin for AI 
 You don't have to install it as a Skill — use it as a plain CLI:
 
 ```bash
-# 1. Clone + install deps
+# 1. Clone + create a uv venv and install deps
 git clone https://github.com/eatmoreduck/boss-zhipin-scraper.git
 cd boss-zhipin-scraper
-pip install -r requirements.txt
+uv venv
+source .venv/bin/activate                 # Linux / macOS
+# .\.venv\Scripts\Activate.ps1           # Windows PowerShell
+uv sync
 
 # 2. Start Chrome CDP
-python3 scripts/boss_cdp_raw.py --setup-chrome
+uv run python scripts/boss_cdp_raw.py --setup-chrome
 # First run won't copy your main Chrome session; log in to zhipin.com in the dedicated BOSS browser that pops up
 # setup waits for login to finish and confirms the API returns plaintext salaries
 
 # 3. Check the environment
-python3 scripts/boss_cdp_raw.py --check
+uv run python scripts/boss_cdp_raw.py --check
 
 # Optional: real browser/API smoke test (writes no result files)
-python3 scripts/boss_cdp_raw.py --smoke-test
+uv run python scripts/boss_cdp_raw.py --smoke-test
 
 # 4. Scrape
-python3 scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --format csv --analysis
+uv run python scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --format csv --analysis
 
 # 5. Summary + prompt after scraping
-python3 scripts/job_summary.py --top 15
+uv run python scripts/job_summary.py --top 15
 ```
 
 ## Parameters
@@ -184,16 +190,16 @@ python3 scripts/job_summary.py --top 15
 
 ```bash
 # Read the newest boss_jobs_*.json under the default result dir and auto-match the same-timestamp or newest detail file
-python3 scripts/job_summary.py
+uv run python scripts/job_summary.py
 
 # Specify list and detail files
-python3 scripts/job_summary.py \
+uv run python scripts/job_summary.py \
   --input ~/.boss-zhipin-scraper/job-result/boss_jobs_20260625_1200.json \
   --details ~/.boss-zhipin-scraper/job-result/boss_details_20260625_1200.json \
   --top 15
 
 # Only emit the prompt
-python3 scripts/job_summary.py --prompt-only
+uv run python scripts/job_summary.py --prompt-only
 ```
 
 After installing the package you can also use the entry command:
@@ -257,13 +263,13 @@ The interactive login page opened by `--setup-chrome` is the only temporary page
 If you really need to import the BOSS session from your main Chrome, run explicitly:
 
 ```bash
-python3 scripts/boss_cdp_raw.py --setup-chrome --copy-login-state
+uv run python scripts/boss_cdp_raw.py --setup-chrome --copy-login-state
 ```
 
 `--copy-login-state` overwrites the corresponding cookie-related files inside the isolated profile on every run; do not pass this for daily launches. It only copies `Local State` and `Default/Cookies*`, `Default/Network/Cookies*`-style cookie database files — not password stores, history, extensions, or a full profile. To wipe the dedicated browser's login state:
 
 ```bash
-python3 scripts/boss_cdp_raw.py --setup-chrome --reset-chrome-profile
+uv run python scripts/boss_cdp_raw.py --setup-chrome --reset-chrome-profile
 ```
 
 ### Tearing down when you're done
@@ -271,7 +277,7 @@ python3 scripts/boss_cdp_raw.py --setup-chrome --reset-chrome-profile
 After a scrape/analysis finishes, the dedicated Chrome is **not** closed automatically (the login state is kept by default so you can run the next scrape right away). When you're sure you no longer need it, tear it down manually:
 
 ```bash
-python3 scripts/boss_cdp_raw.py --stop-chrome
+uv run python scripts/boss_cdp_raw.py --stop-chrome
 ```
 
 `--stop-chrome` only closes the Chrome process(es) that belong to the scraper's isolated profile (`--user-data-dir`). It **never** kills by port or process name, so it cannot accidentally take down your main Chrome, Gmail, GitHub, or other signed-in sessions.
@@ -279,7 +285,7 @@ python3 scripts/boss_cdp_raw.py --stop-chrome
 If you'd rather have a particular scrape close the dedicated Chrome once it finishes normally, add `--close-chrome`:
 
 ```bash
-python3 scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --close-chrome
+uv run python scripts/boss_cdp_raw.py --keyword "AI Agent" --city 上海 --pages 3 --close-chrome
 ```
 
 `--close-chrome` is off by default, and it only fires on the **success path** of a completed scrape — login failures, crashes, and other early exits leave the Chrome running so the login state is preserved.
